@@ -91,25 +91,30 @@ int main()
 {
     Solution s;
 
-    vector<string> exps(5);
+    char exps[5][3];
+    vector<string> expression;
     int n;
     cout<<"Enter the size for expression 1: ";
     cin>>n;
 
     for(int i=0; i<n; i++) {
         cin>>exps[i];
+        expression.push_back(exps[i]);
     }
-    cout << s.evalRPN(exps)<<endl;
+    cout << s.evalRPN(expression)<<endl;
 
-    vector<string> exps2(5);
+
+    char exps2[5][3];
+    expression.clear();
     cout<<"Enter the size for expression 2: ";
     cin>>n;
 
     for(int i=0; i<n; i++) {
         cin>>exps2[i];
+        expression.push_back(exps[i]);
     }
 
-    cout << s.evalRPN(exps2)<<endl;
+    cout << s.evalRPN(expression)<<endl;
 
     return 0;
 }
