@@ -1,38 +1,115 @@
-// Time:  O(n)
-// Space: O(n)
+// Source : https://oj.leetcode.com/problems/evaluate-reverse-polish-notation/
+// Author : Hao Chen
+// Date   : 2014-06-16
+
+/********************************************************************************** 
+* 
+* Evaluate the value of an arithmetic expression in Reverse Polish Notation.
+* 
+* Valid operators are +, -, *, /. Each operand may be an integer or another expression.
+* 
+* Some examples:
+* 
+*   ["2", "1", "+", "3", "*"] -> ((2 + 1) * 3) -> 9
+*   ["4", "13", "5", "/", "+"] -> (4 + (13 / 5)) -> 6
+* 
+*               
+**********************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string>
+#include <vector>
+#include <iostream>
+using namespace std;
+
 
 class Solution {
 public:
-    int evalRPN(vector<string>& tokens) {
-        if (tokens.empty()) {
-            return 0;
-        }
-        stack<string> s;
-        for (const auto& tok : tokens) {
-            if (!is_operator(tok)) {
-                s.emplace(tok);
-            } else {
-                auto&& y = stoi(s.top());
-                s.pop();
-                auto&& x = stoi(s.top());
-                s.pop();
-                if (tok[0] == '+') {
-                    x += y;
-                } else if (tok[0] == '-') {
-                    x -= y;
-                } else if (tok[0] == '*') {
-                    x *= y;
-                } else {
-                    x /= y;
+    int evalRPN(vector<string> &tokens) {
+        int i =0;
+        bool err = false;
+        vector<int> exp;
+        for (int i=0; i<tokens.size() && !err; i++ ){
+            if (isNum(tokens[i])) {
+                exp.push_back(value);
+            } else if( isOp(tokens[i])==true ) {
+                if (exp.size() < 2) {
+                    return 0; //ERROR
                 }
-                s.emplace(to_string(x));
+                int lhs, rhs;
+                rhs = exp.back();
+                exp.pop_back();
+                lhs = exp.back();
+                exp.pop_back();
+
+                int evlValue;
+                if (tokens[i]=="+"){
+                    evlValue = lhs + rhs;    
+                }else if (tokens[i]=="-"){
+                    evlValue = lhs - rhs;
+                }else if (tokens[i]=="*"){
+                    evlValue = lhs * rhs;
+                }else if (tokens[i]=="/"){
+                    evlValue = lhs / rhs;
+                }
+
+                exp.push_back(evlValue);
+
+            }else {
+                return 0; //ERROR 
             }
         }
-        return stoi(s.top());
+
+        if (exp.size()==1){
+            return exp.back();
+        }
+        return 0;        
+
     }
 
 private:
-    bool is_operator(const string& op) {
-        return op.length() == 1 && string("+-*/").find(op) != string::npos;
+    long value;
+
+    bool isOp(string &op) {
+        return (op=="+" || op=="-" || op=="*" || op=="/");
+    }
+
+    bool isNum(string &num) {
+        char *end;
+        value = strtol(num.c_str(), &end, 10); 
+        if (end == num.c_str() || *end != '\0' || errno == ERANGE){
+            return false;
+        }
+        return true;
     }
 };
+
+
+int main()
+{
+    Solution s;
+
+    vector<string> exps(5);
+    int n;
+    cout<<"Enter the size for expression 1: ";
+    cin>>n;
+
+    for(int i=0; i<n; i++) {
+        cin>>exps[i];
+    }
+    cout << s.evalRPN(exps)<<endl;
+
+    vector<string> exps2(5);
+    cout<<"Enter the size for expression 2: ";
+    cin>>n;
+
+    for(int i=0; i<n; i++) {
+        cin>>exps2[i];
+    }
+
+    cout << s.evalRPN(exps2)<<endl;
+
+    return 0;
+}
