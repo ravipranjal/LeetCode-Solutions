@@ -1,94 +1,239 @@
-// Time:  O(1), per operation.
-// Space: O(k), k is the capacity of cache.
+#include <stdlib.h>
+#include <time.h>
+#include <iostream>
+#include <map>
+using namespace std;
 
-#include <list>
+// The idea here is quite simple:
+//    1) A Map to index the key.  O(1) key search time-complexity.
+//    2) A List to sort the cache data by accessed time.
+// 
+//  Considering there are too many insert/delete opreations for the List, 
+//  The ouble linked list is the good data structure to performance it.
 
-class LRUCache {
-public:
-    LRUCache(int capacity) : capa_(capacity) {
-    }
-    
-    int get(int key) {
-        if (!map_.count(key)) {
-            return -1;
-        }
-        // It key exists, update it.
-        const auto value = map_[key]->second;
-        update(key, value);
-        return value;
-    }
-    
-    void put(int key, int value) {
-        if (capa_ <= 0) {
-            return;
-        }
-
-        // If cache is full while inserting, remove the last one.
-        if (!map_.count(key) && list_.size() == capa_) {
-            auto del = list_.front(); list_.pop_front();
-            map_.erase(del.first);
-        }
-        update(key, value);
-    }
-    
-private:
-    list<pair<int, int>> list_; // key, value
-    unordered_map<int, list<pair<int, int>>::iterator> map_; // key, list iterator
-    int capa_;
-    
-    // Update (key, iterator of (key, value)) pair
-    void update(int key, int value) {
-        auto it = map_.find(key);
-        if (it != map_.end()) {
-            list_.erase(it->second);
-        }
-        list_.emplace_back(key, value);
-        map_[key] = prev(end(list_));
-    }
+class Node {
+    public:
+        int key;
+        int value;
+        Node *next, *prev;
+        Node(int k, int v) { key=k; value=v; next = prev = NULL; }
+        //Node(int k, int v, Node* n=NULL, Node* p=NULL): key(k), value(v), next(n), prev(p) {}
 };
 
-// Time:  O(1), per operation.
-// Space: O(k), k is the capacity of cache.
-class LRUCache2 {
-public:
-    LRUCache2(int capacity) : capa_(capacity) {
-    }
-    
-    int get(int key) {
-        if (!map_.count(key)) {
-            return -1;
+// the following double linked list seems a bit commplicated.
+class DoubleLinkedList {
+
+    private:
+
+        Node *pHead, *pTail;
+        int size;
+
+
+    public:
+
+        DoubleLinkedList(){
+            pHead = pTail = NULL;
+            size = 0;
         }
-        // It key exists, update it.
-        const auto value = map_[key]->second;
-        update(key, value);
-        return value;
-    }
-    
-    void put(int key, int value) {
-        if (capa_ <= 0) {
-            return;
+        ~DoubleLinkedList() {
+            while(pHead!=NULL){
+                Node*p = pHead;
+                pHead = pHead->next;
+                delete p;
+            }
         }
-    
-        // If cache is full while inserting, remove the last one.
-        if (!map_.count(key) && list_.size() == capa_) {
-            auto del = list_.back(); list_.pop_back();
-            map_.erase(del.first);
+
+        int Size() const {
+            return size;
         }
-        update(key, value);
-    }
-    
-private:
-    list<pair<int, int>> list_; // key, value
-    unordered_map<int, list<pair<int, int>>::iterator> map_; // key, list iterator
-    int capa_;
-    
-    // Update (key, iterator of (key, value)) pair
-    void update(int key, int value) {
-        auto it = map_.find(key);
-        if (it != map_.end()) {
-            list_.erase(it->second);
+
+        Node* NewAtBegin(int key, int value) {
+            Node *n = new Node(key, value);
+            return AddAtBegin(n);
         }
-        list_.emplace_front(key, value);
-        map_[key] = list_.begin();
-    }
+
+        Node* NewAtEnd(int key, int value) {
+            Node *n = new Node(key, value);
+            return AddAtEnd(n);
+        }
+
+        Node* AddAtBegin(Node* n){
+            size++;
+
+            if (pHead==NULL) { 
+                pHead = pTail = n; 
+                return n; 
+            }
+
+            n->next = pHead;
+            n->prev = NULL;
+            pHead->prev = n;
+            pHead = n;
+            return n;
+        }
+
+        Node* AddAtEnd(Node* n) {
+            size++;
+
+            if (pHead==NULL) { 
+                pHead = pTail = n; 
+                return n; 
+            }
+
+            pTail->next = n;
+            n->prev = pTail;
+            n->next = NULL;
+            pTail = n;
+
+            return n;
+        }
+
+        void Unlink(Node* n){
+            Node* before = n->prev;
+            Node* after = n->next;
+
+            if (before){
+                before->next = after;  
+            }
+
+            if (after){ 
+                after->prev = before;
+            }
+
+            if(pHead == n){
+                pHead = pHead->next;
+            }else if(pTail == n) {
+                pTail = pTail->prev;
+            }
+
+            size--;
+        }
+
+        void Delete(Node* n){
+            Unlink(n);
+            delete n;
+        }
+
+        void TakeToBegin(Node* n){
+            Unlink(n);
+            AddAtBegin(n);
+        } 
+
+        Node* GetTailNode() {
+            return pTail;
+        } 
+
+        void DeleteLast() {
+            Delete(pTail);
+        } 
+
+        void Print(){
+            Node* p = pHead;
+            while(p!=NULL) {
+                cout << "(" << p->key << "," << p->value << ") ";
+                p = p->next;
+            }
+            cout << endl;
+        }
 };
+
+
+
+class LRUCache{
+
+    private:
+        //cacheList - store the date
+        DoubleLinkedList cacheList;
+        //cacheMap - index the date for searching
+        map<int, Node*> cacheMap;
+        //the max capcity of cache
+        int capacity;
+
+    public:
+        LRUCache(int capacity) {
+            this->capacity = capacity;    
+        }
+        void print(){
+            cacheList.Print();
+        }
+
+        int get(int key) {
+            // The accessed node must be up-to-time -- take to the front 
+            if (cacheMap.find(key) != cacheMap.end() ){
+                cacheList.TakeToBegin(cacheMap[key]);
+                return cacheMap[key]->value;
+            }
+            return -1;
+
+        }
+
+        void set(int key, int value) {
+            // key found, update the data, and take to the front 
+            if (cacheMap.find(key) != cacheMap.end() ){
+                Node *p = cacheMap[key];
+                p->value = value;
+                cacheList.TakeToBegin(cacheMap[key]);
+            }else{
+                // key not found, new a node to store data
+                cacheMap[key] = cacheList.NewAtBegin(key, value);
+                // if the capacity exceed, remove the last one.
+                if( cacheList.Size() > capacity) {
+                    int key = cacheList.GetTailNode()->key; 
+                    cacheMap.erase(key);
+                    cacheList.DeleteLast();
+                }
+            }
+        }
+};
+
+int main(int argc, char** argv) 
+{
+    /*
+    LRUCache c(2);
+    c.set(2,1);
+    c.print();
+    c.set(2,2);
+    c.print();
+    c.get(2);
+    c.print();
+    c.set(1,1);
+    c.print();
+    c.set(4,1);
+    c.print();
+    c.get(2);
+    c.print();
+
+    cout << "---------" << endl;
+    */
+    srand(time(0));
+
+    int capacity = 5;
+    int test_loop_times = 10;
+    if (argc>1){
+        capacity = atoi(argv[1]);
+    }
+    if (argc>2){
+        test_loop_times = atoi(argv[2]);
+    }
+
+    if(to_string(capacity) != argv[1] || to_string(test_loop_times) != argv[2]) {
+        cout<<"Can't execute LRUCache implementation. Terminating the execution!"<<endl;
+    } else {
+        LRUCache cache(capacity);
+
+        int v; 
+        for(int i=0; i<test_loop_times; i++) {
+            v = i;//rand() % capacity;
+            cout << "set " << v << ": ";
+            cache.set(v, v);
+            cache.print();
+
+            v = rand() % capacity;
+            cout << "get " << v << ": " << cache.get(v);
+            cache.print();
+
+            cout << endl;
+        }
+    }
+    return 0;
+}
