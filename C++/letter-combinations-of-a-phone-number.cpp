@@ -1,85 +1,87 @@
-// Time:  O(n * 4^n)
-// Space: O(1)
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
 
-// iterative solution
-class Solution {
-public:
-    vector<string> letterCombinations(string digits) {
-        static const vector<string> lookup = {" ", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        
-        if (empty(digits)) {
-            return {};
+/*
+{{' ',  '\0', '\0', '\0' }, //0
+ {'\0', '\0', '\0', '\0' }, //1
+ {'a',  'b',  'c',  '\0' }, //2
+ {'d',  'e',  'f',  '\0' }, //3
+ {'g',  'h',  'i',  '\0' }, //4
+ {'j',  'k',  'l',  '\0' }, //5
+ {'m',  'n',  'o',  '\0' }, //6
+ {'p',  'q',  'r',  's'  }, //7
+ {'t',  'u',  'v',  '\0' }, //8
+ {'w',  'x',  'y',  'z'  }, //9
+}
+*/
+
+vector<string> letterCombinations(string digits, int n) {
+    char phone[10][4];
+
+    for(int i=0; i<n; i++) {
+        cout<<"Enter the letters corresponding to the digit: "<<i<<endl;
+        for(int j=0; j<3; j++) {
+            cin>>phone[i][j];
         }
-        int total = 1;
-        for (const auto& digit : digits) {
-            total *= size(lookup[digit - '0']);
-        }
-        vector<string> result;
-        for (int i = 0; i < total; ++i) {
-            int base = total;
-            string curr;
-            for (const auto& digit : digits) {
-                const auto& choices = lookup[digit - '0'];
-                base /= size(choices);
-                curr.push_back(choices[(i / base) % size(choices)]);
+    }
+
+    vector<string> result;
+    if (digits.size()<=0){
+        result.push_back("");
+        return result;
+    }
+    for( int i=0; i<digits.size(); i++ ) {
+        if (!isdigit(digits[i])) {
+            vector<string> r;
+            return r;
+        } 
+        int d = digits[i] - '0';
+        if (result.size()<=0){
+            for( int j=0; j<4 && phone[d][j]!='\0'; j++ ){
+                string s;
+                s += phone[d][j];
+                result.push_back(s);
             }
-            result.emplace_back(move(curr));
+            continue;
         }
-        return result;
-    }
-};
-        
-// Time:  O(n * 4^n)
-// Space: O(1)
-// iterative solution
-class Solution2 {
-public:
-    vector<string> letterCombinations(string digits) {
-        static const vector<string> lookup = {" ", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        
-        if (empty(digits)) {
-            return {};
-        }
-        vector<string> result = {""};
-        for (int i = size(digits) - 1; i >= 0; --i) {
-            const auto& choices = lookup[digits[i] - '0'];
-            int m = size(choices), n = size(result);
-            result.resize(m * n);
-            for (int j = m * n - 1; j >= 0; --j) {
-                result[j] = choices[j / n] + result[j % n];
+        vector<string> r;
+        for (int j=0; j<result.size(); j++){
+            for( int k=0; k<4 && phone[d][k]!='\0'; k++ ){
+                string s = result[j] + phone[d][k];
+                //sort(s.begin(), s.end());
+                r.push_back(s); 
             }
         }
-        return result;
+        result = r;
     }
-};
+    //sort(result.begin(), result.end());
 
-// Time:  O(n * 4^n)
-// Space: O(n)
-// recursive solution
-class Solution3 {
-public:
-    vector<string> letterCombinations(string digits) {
-        if (empty(digits)) {
-            return {};
-        }
-        vector<string> result;
-        string curr;
-        letterCombinationsRecu(digits, &curr, &result);
-        return result;
+    return result; 
+}
+
+void printVector(vector<string>& ss){
+    cout << "{ ";
+    for(int i=0; i<ss.size(); i++){
+        if (i>0) cout << ", "; 
+        cout << ss[i];
+    }
+    cout << " }" << endl;
+}
+
+int main(int argc, char**argv)
+{
+    string s="23";
+    if (argc>1){
+        s=argv[1];
     }
 
-private:
-    void letterCombinationsRecu(const string &digits, string *curr, vector<string> *result) {
-        static const vector<string> lookup = {" ", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        
-        if (size(*curr) == size(digits)) {
-            result->emplace_back(*curr);
-            return;
-        }
-        for (const auto& c: lookup[digits[size(*curr)] - '0']) {
-            curr->push_back(c);
-            letterCombinationsRecu(digits, curr, result);
-            curr->pop_back();
-        }
-    }
-};
+    int n;
+    cout<<"Enter the total keys/digits in the phone: ";
+    cin>>n;
+    vector<string> ss = letterCombinations(s, n);
+    printVector(ss);
+    return 0;
+}
