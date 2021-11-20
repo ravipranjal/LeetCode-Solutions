@@ -74,7 +74,9 @@ int main(int argc, char**argv)
         n = atoi(argv[1]);
     }
 
-    if(n > 0) {
+    if(to_string(n) != argv[1]) {
+        cout<<"Ratings can't be given. Terminating!"<<endl;
+    } else {
         vector<int> ratings;
         generateRatings(ratings, n);
         print(ratings);
@@ -86,8 +88,6 @@ int main(int argc, char**argv)
         vector<int> ra(r, r+sizeof(r)/sizeof(r[0]));
         print(ra);
         cout << candy(ra) << endl;
-    } else {
-        cout<<"n is negative. Terminating the execution!"<<endl;
     }
     
     return 0;
