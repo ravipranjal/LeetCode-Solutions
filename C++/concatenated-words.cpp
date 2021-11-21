@@ -40,7 +40,7 @@ int main() {
     vector<string> w;
 
     for(int i=0; i<n; i++) {
-        scanf("%50s", words[i]);
+        scanf("%50s", &words[i]);
         w.push_back(words[i]);
     }
 

@@ -53,10 +53,10 @@ int main() {
 
     cout<<"Enter query and word: "<<endl;
     for(int i=0; i<n; i++) {
-        scanf("%50s", queries[i]);
+        scanf("%50s", &queries[i]);
         q.push_back(queries[i]);
 
-        scanf("%50s", words[i]);
+        scanf("%50s", &words[i]);
         w.push_back(words[i]);
     }
 
