@@ -9,15 +9,21 @@ int calculateTime(int dist, int speed) {
 }
 
 int main() {
-	int distance[5] = {10, 20, 30, 40, 50};
-	int speed[5] = {2, 3, 4, 5, 6};
+	int distance[5];
+	int speed[5];
+	bool terminate = false;
 
-	free(distance);
-	
+	cout<<"Enter distance and speed elements"<<endl;
 	for(int i=0; i<5; i++) {
-		if(distance[i] && speed[i]) {
-			cout<<calculateTime(distance[i], speed[i])<<endl;
+		cin>>distance[i];
+		cin>>speed[i];
+		if(distance[i] < 0 || speed[i] <= 0) {
+			free(distance);
+			free(speed);
+			terminate = true;
 		}
+		cout<<calculateTime(distance[i], speed[i])<<endl;
+		if(terminate) break;
 	}
 	
 	return 0;
