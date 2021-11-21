@@ -80,7 +80,7 @@ int main()
     cin>>n;
 
     for(int i=0; i<n; i++) {
-        cin>>exps[i];
+        scanf("%50s", exps[i]);
         expression.push_back(exps[i]);
     }
     cout << s.evalRPN(expression)<<endl;
@@ -92,7 +92,7 @@ int main()
     cin>>n;
 
     for(int i=0; i<n; i++) {
-        cin>>exps2[i];
+        scanf("%50s", exps2[i]);
         expression.push_back(exps[i]);
     }
 
