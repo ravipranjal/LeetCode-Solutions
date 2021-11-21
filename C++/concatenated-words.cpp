@@ -11,7 +11,8 @@ using namespace std;
 vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
     unordered_set<string> lookup(words.begin(), words.end());
     vector<string> result;
-    for (const auto& word : words) {
+    for (int i=0; i<words.size(); i++) {
+        string word = words[i];
         vector<bool> dp(word.length() + 1);
         dp[0] = true;
         for (int i = 0; i < word.length(); ++i) {
@@ -24,7 +25,7 @@ vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {
                 }
             }
             if (dp[word.length()]) {
-                result.emplace_back(word);
+                result.push_back(word);
                 break;
             }
         }
@@ -40,7 +41,7 @@ int main() {
     vector<string> w;
 
     for(int i=0; i<n; i++) {
-        scanf("%50s", &words[i]);
+        scanf("%50s", words[i]);
         w.push_back(words[i]);
     }
 
