@@ -22,7 +22,7 @@ int main() {
 			free(speed);
 			terminate = true;
 		}
-		cout<<calculateTime(distance[i], speed[i])<<endl;
+		cout<<"The time in nearest integer is: "<<calculateTime(distance[i], speed[i])<<endl;
 		if(terminate) break;
 	}
 	
